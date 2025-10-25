@@ -4,32 +4,30 @@ import matplotlib.pyplot as plt
 
 dados = pd.read_csv('winequality-red.csv', sep=";")
 
-media_values = dados.groupby("quality")[["alcohol", "volatile acidity", "citric acid", "sulphates", "residual sugar"]].mean()
-fig, axes = plt.subplots(1,5, figsize=(20,4))
+def plot_medias_quality(dados):
+    """
+    plotar graficos mostrando a media das variaveis em relaçao a qualidade do vinho, para ver tendencias
+    """
 
-media_values["alcohol"].plot(kind="bar", ax = axes[0], color = "pink", alpha=0.6)
-axes[0].set_title("Alcool x Qualidade")
-axes[0].set_ylabel("Media")
+    media = dados.groupby("quality")[["alcohol", "volatile acidity", "citric acid", "sulphates", "residual sugar"]].mean()
+    fig, axes = plt.subplots(1,5, figsize=(20,4))
 
-media_values["volatile acidity"].plot(kind="bar", ax=axes[1], color="green", alpha=0.6)
-axes[1].set_title("Acidez volatil x Qualidade")
-axes[1].set_ylabel("Media")
+    colunas = ["alcohol", "volatile acidity", "citric acid", "sulphates","residual sugar"]
+    cores = ["pink", "green", "black", "orange", "blue"]
+    titulos = ["Álcool x Qualidade","Acidez Volátil x Qualidade","Ácido Cítrico x Qualidade","Sulfatos x Qualidade","Açúcar Residual x Qualidade"]
 
-media_values["citric acid"].plot(kind="bar", ax=axes[2], color="black", alpha=0.6)
-axes[2].set_title("Acidez Citrica x Qualidade")
-axes[2].set_ylabel("Media")
+    for x, coluna in enumerate(colunas):
+        media[coluna].plot(kind="bar", ax=axes[x], color=cores[x], alpha = 0.8)
+        axes[x].set_title(titulos[x])
+        axes[x].set_ylabel("Média")
+    
+    plt.tight_layout()
+    plt.show()
 
-media_values["sulphates"].plot(kind="bar", ax=axes[3], color="orange", alpha=0.6 )
-axes[3].set_title("Sulfatos x Qualidade")
-axes[3].set_ylabel("Media")
 
-media_values["residual sugar"].plot(kind="bar", ax=axes[4], color="blue", alpha=0.6 )
-axes[4].set_title("Açucar residual x Qualidade")
-axes[4].set_ylabel("Media")
+print("moda: ", dados["quality"].mode()[0])
 
-plt.tight_layout()
-plt.show()
-##plotando nivel de alcool e nivel de qualidade - tem correlaçao (talvez?)
+plot_medias_quality(dados) ## A moda da qualidade é 5, indicando que essa é a nota mais comum atribuída aos vinhos
 
 
 ##nota-se que tem muitos dados, dificil analisar visualmente, entao aplicamos agrupamento por qualidade e tiramos as medias
