@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 dados = pd.read_csv('winequality-red.csv', sep=";")
@@ -24,10 +25,23 @@ def plot_medias_quality(dados):
     plt.tight_layout()
     plt.show()
 
+def plot_media_mediana_histograma(dados):
+    """
+    Plota histograma dos valores de alcohol, mostrando a distribuiçao no conjunto de dados.
+    A curva na cor #D35269 mostra a densidade de probabilidade estimada
+    Nota-se uma distribuiçao assimétrica
+    """
+    sns.histplot(dados["alcohol"], kde=True, color="#D35269")
+    plt.axvline(dados["alcohol"].mean(), color="#361F27", linestyle="--", label="Média")
+    plt.axvline(dados["alcohol"].median(), color="#43AA8B", linestyle="--", label="Mediana")
+    plt.legend()
+    plt.title("Distribuiçaode Alcool com Média e Mediana")
+    plt.show()
 
 print("moda: ", dados["quality"].mode()[0])
 
 plot_medias_quality(dados) ## A moda da qualidade é 5, indicando que essa é a nota mais comum atribuída aos vinhos
+plot_media_mediana_histograma(dados)
 
 
 ##nota-se que tem muitos dados, dificil analisar visualmente, entao aplicamos agrupamento por qualidade e tiramos as medias
