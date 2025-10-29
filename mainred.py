@@ -67,13 +67,35 @@ def plot_media_mediana_histograma_density(dados):
     plt.title("Distribuiçaode Densidade com Média e Mediana")
     plt.show()
 
+def plot_media_mediana_histograma_citric(dados):
+    """
+
+    """
+    sns.histplot(dados["citric acid"], kde=True, color="#4A5043")
+    plt.axvline(dados["citric acid"].mean(), color="#F95738", linestyle="--", label="Média")
+    plt.axvline(dados["citric acid"].median(), color="#B9D8C2", linestyle="--", label="Mediana")
+    plt.legend()
+    plt.title("Distribuiçaode acido citrico com Média e Mediana")
+    plt.show()
+
+def plot_media_mediana_histograma_sulphates(dados):
+    """
+
+    """
+    sns.histplot(dados["sulphates"], kde=True, color="#4A5043")
+    plt.axvline(dados["sulphates"].mean(), color="#F95738", linestyle="--", label="Média")
+    plt.axvline(dados["sulphates"].median(), color="#B9D8C2", linestyle="--", label="Mediana")
+    plt.legend()
+    plt.title("Distribuiçao de sulphates com Média e Mediana")
+    plt.show()
 print("moda: ", dados["quality"].mode()[0])
 
 plot_medias_quality(dados) ## A moda da qualidade é 5, indicando que essa é a nota mais comum atribuída aos vinhos
 plot_media_mediana_histograma_alcohol(dados)
 plot_media_mediana_histograma_volatile_acidity(dados)
 plot_media_mediana_histograma_density(dados)
-
+plot_media_mediana_histograma_citric(dados)
+plot_media_mediana_histograma_sulphates(dados)
 ##nota-se que tem muitos dados, dificil analisar visualmente, entao aplicamos agrupamento por qualidade e tiramos as medias
 ##vinhos com mais alcool tendem a ter qualidade mais alta,
 ##adicionando a variavel volatile acidity, nota-se que quanto maior a qualidade, maior o nivel de alcool e menor o nivel de acidez
