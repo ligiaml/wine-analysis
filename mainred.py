@@ -1,6 +1,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import scipy.stats as sp
 import seaborn as sns
+import numpy as np
 
 
 dados = pd.read_csv('winequality-red.csv', sep=";")
@@ -27,11 +29,9 @@ def plot_medias_quality(dados):
     
     plt.tight_layout()
     plt.show()
-
 def plot_media_mediana_histograma_alcohol(dados):
     """
     Plota histograma dos valores de alcohol, mostrando a distribuiçao no conjunto de dados.
-    A curva na cor #D35269 mostra a densidade de probabilidade estimada
     Nota-se uma distribuiçao assimétrica
     """
     sns.histplot(dados["alcohol"], kde=True, color="#D35269")
@@ -40,11 +40,9 @@ def plot_media_mediana_histograma_alcohol(dados):
     plt.legend()
     plt.title("Distribuiçaode Alcool com Média e Mediana")
     plt.show()
-
 def plot_media_mediana_histograma_volatile_acidity(dados):
     """
     Plota histograma dos valores de acidez volatil, mostrando a distribuiçao no conjunto de dados.
-    A curva na cor #E06C9F mostra a densidade de probabilidade estimada
     Nota-se uma distribuiçao assimétrica
     """
     sns.histplot(dados["volatile acidity"], kde=True, color="#E06C9F")
@@ -53,11 +51,9 @@ def plot_media_mediana_histograma_volatile_acidity(dados):
     plt.legend()
     plt.title("Distribuiçaode Acidez Volatil com Média e Mediana")
     plt.show()
-
 def plot_media_mediana_histograma_density(dados):
     """
     Plota histograma dos valores de densidade, mostrando a distribuiçao no conjunto de dados.
-    A curva na cor #4A5043 mostra a densidade de probabilidade estimada
     Nota-se uma distribuiçao simétrica, distribuição normal
     """
     sns.histplot(dados["density"], kde=True, color="#4A5043")
@@ -66,21 +62,19 @@ def plot_media_mediana_histograma_density(dados):
     plt.legend()
     plt.title("Distribuiçaode Densidade com Média e Mediana")
     plt.show()
-
 def plot_media_mediana_histograma_citric(dados):
     """
-
+    Plota histograma dos valores de acido citrico, mostrando a distribuição do conjunto de dados
     """
     sns.histplot(dados["citric acid"], kde=True, color="#4A5043")
     plt.axvline(dados["citric acid"].mean(), color="#F95738", linestyle="--", label="Média")
     plt.axvline(dados["citric acid"].median(), color="#B9D8C2", linestyle="--", label="Mediana")
     plt.legend()
-    plt.title("Distribuiçaode acido citrico com Média e Mediana")
+    plt.title("Distribuiçaode Acido Citrico com Média e Mediana")
     plt.show()
-
 def plot_media_mediana_histograma_sulphates(dados):
     """
-
+    Plota histograma dos valores de sulfato, mostrando a distribuição do conjunto de dados
     """
     sns.histplot(dados["sulphates"], kde=True, color="#4A5043")
     plt.axvline(dados["sulphates"].mean(), color="#F95738", linestyle="--", label="Média")
@@ -90,13 +84,87 @@ def plot_media_mediana_histograma_sulphates(dados):
     plt.show()
 print("moda: ", dados["quality"].mode()[0])
 
-plot_medias_quality(dados) ## A moda da qualidade é 5, indicando que essa é a nota mais comum atribuída aos vinhos
 plot_media_mediana_histograma_alcohol(dados)
-plot_media_mediana_histograma_volatile_acidity(dados)
 plot_media_mediana_histograma_density(dados)
-plot_media_mediana_histograma_citric(dados)
 plot_media_mediana_histograma_sulphates(dados)
 ##nota-se que tem muitos dados, dificil analisar visualmente, entao aplicamos agrupamento por qualidade e tiramos as medias
 ##vinhos com mais alcool tendem a ter qualidade mais alta,
 ##adicionando a variavel volatile acidity, nota-se que quanto maior a qualidade, maior o nivel de alcool e menor o nivel de acidez
 ###dar uma olhada em gama e chisquared
+
+plt.boxplot(dados["alcohol"])
+plt.title("boxplot alcohol")
+plt.show()
+plt.boxplot(dados["density"])
+plt.title("boxplot density")
+plt.show()
+plt.boxplot(dados["sulphates"])
+plt.title("boxplor sulfatos")
+plt.show()
+
+############################
+
+def mm_normal(x):
+    """calcula média e desvio padrão (método dos momentos da Normal)"""
+    return {'mu': np.mean(x), 'sigma': np.std(x, ddof=0)}
+def mm_gamma(x):
+    m=np.mean(x)
+    v=np.var(x,ddof=0)
+    alpha=m**2 /v
+    beta = v/m
+    return {'a': alpha, 'scale':beta}
+def mm_lognormal(x):
+    m=np.mean(x)
+    v=np.var(x, ddof=0)
+    phi=np.log(1+v/m**2)
+    sigma=np.sqrt(phi)
+    mu=np.log(m) - 0.5 * phi
+    return{'mu':mu, 'sigma':sigma}
+def mle_fit(dist_name, x):
+    x = np.asarray(x)
+    if dist_name == 'normal':
+        mu, sigma = sp.norm.fit(x)
+        return {'mu': mu, 'sigma': sigma}
+    elif dist_name == 'gamma':
+        a, loc, scale = sp.gamma.fit(x, floc=0)
+        return {'a': a, 'loc': loc, 'scale': scale}
+    elif dist_name == 'lognorm':
+        s, loc, scale = sp.lognorm.fit(x, floc=0)
+        return {'s': s, 'loc': loc, 'scale': scale}
+    else:
+        raise ValueError('Distribuição não suportada.')
+
+##########################
+
+def compara_ajustes(x, nome_var, dists):
+    """
+    Gera histograma e curvas ajustadas para as distribuições em 'dists'.
+    dists = lista de strings ('normal', 'gamma', 'lognorm')
+    """
+    x=x.dropna()
+    plt.figure(figsize=(8,5))
+    plt.hist(x, bins=30, density=True, alpha=0.6, color='gray', label='Dados observados')
+    xs=np.linspace(x.min(), x.max(), 300)
+
+    for dist_name in dists:
+        params = mle_fit(dist_name, x)
+        if dist_name == 'normal':
+            pdf = sp.norm.pdf(xs, params['mu'], params['sigma'])
+            label = f"Normal (μ={params['mu']:.3f}, σ={params['sigma']:.3f})"
+        elif dist_name == 'gamma':
+            pdf = sp.gamma.pdf(xs, params['a'], params['loc'], params['scale'])
+            label = f"Gamma (α={params['a']:.2f}, θ={params['scale']:.3f})"
+        elif dist_name == 'lognorm':
+            pdf = sp.lognorm.pdf(xs, params['s'], params['loc'], params['scale'])
+            label = f"LogNorm (μ={np.log(params['scale']):.3f}, σ={params['s']:.3f})"
+        plt.plot(xs, pdf, label=label)
+        plt.title(f"Comparação: dados observados x ajustes ({nome_var})")
+        plt.xlabel(nome_var)
+        plt.ylabel("Densidade")
+        plt.legend()
+        plt.tight_layout()
+        plt.show()
+    
+compara_ajustes(dados["alcohol"], "Álcool", ["normal", "gamma"])
+compara_ajustes(dados["density"], "Densidade", ["normal", "lognorm"])
+compara_ajustes(dados["sulphates"], "Sulfatos", ["gamma", "lognorm"])
