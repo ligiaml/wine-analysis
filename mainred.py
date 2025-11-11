@@ -82,11 +82,19 @@ def plot_media_mediana_histograma_sulphates(dados):
     plt.legend()
     plt.title("Distribuiçao de sulphates com Média e Mediana")
     plt.show()
+def plot_media_histograma_fixed_acidity(dados):
+    sns.histplot(dados["fixed acidity"], kde=True, color="#4A5043")
+    plt.axvline(dados["fixed acidity"].mean(), color="#F95738", linestyle="--", label="Média")
+    plt.axvline(dados["fixed acidity"].median(), color="#B9D8C2", linestyle="--", label="Mediana")
+    plt.legend()
+    plt.title("Distribuiçao de acidez fixa com Média e Mediana")
+    plt.show()
 print("moda: ", dados["quality"].mode()[0])
 
 plot_media_mediana_histograma_alcohol(dados)
 plot_media_mediana_histograma_density(dados)
 plot_media_mediana_histograma_sulphates(dados)
+plot_media_histograma_fixed_acidity(dados)
 ##nota-se que tem muitos dados, dificil analisar visualmente, entao aplicamos agrupamento por qualidade e tiramos as medias
 ##vinhos com mais alcool tendem a ter qualidade mais alta,
 ##adicionando a variavel volatile acidity, nota-se que quanto maior a qualidade, maior o nivel de alcool e menor o nivel de acidez
@@ -100,6 +108,9 @@ plt.title("boxplot density")
 plt.show()
 plt.boxplot(dados["sulphates"])
 plt.title("boxplor sulfatos")
+plt.show()
+plt.boxplot(dados["fixed acidity"])
+plt.title("boxplot acidez fixa")
 plt.show()
 
 ############################
