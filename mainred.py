@@ -121,8 +121,11 @@ def mm_lognormal(x):
     mu=np.log(m) - 0.5 * phi
     return{'mu':mu, 'sigma':sigma}
 def mle_fit(dist_name, x):
-    x = np.asarray(x)
-    if dist_name == 'normal':
+    x = np.asarray(x, dtype=float)
+    x = x[np.isfinite(x)]
+    if len(x) == 0:
+        raise ValueError("Nenhum dado válido encontrado (todos eram NaN ou infinitos).")
+    if dist_name in ['normal', 'norm']:
         mu, sigma = sp.norm.fit(x)
         return {'mu': mu, 'sigma': sigma}
     elif dist_name == 'gamma':
@@ -132,7 +135,7 @@ def mle_fit(dist_name, x):
         s, loc, scale = sp.lognorm.fit(x, floc=0)
         return {'s': s, 'loc': loc, 'scale': scale}
     else:
-        raise ValueError('Distribuição não suportada.')
+        raise ValueError(f"Distribuição não suportada: {dist_name}")
 
 ##########################
 
